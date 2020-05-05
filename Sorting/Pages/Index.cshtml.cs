@@ -31,12 +31,12 @@ namespace Sorting.Pages
 
         public void OnGet()
         {
-            Sorting = new SortCollection<Widget>(Sort);
-
             Result =
                 Database
-                    .OrderBy(Sorting.ToString())
+                    .OrderBy(Sort, out var sorting)
                     .ToList();
+
+            Sorting = sorting;
         }
 
         public List<Widget> Result { get; set; }

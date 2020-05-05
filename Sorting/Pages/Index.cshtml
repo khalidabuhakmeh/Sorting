@@ -1,0 +1,54 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="col-md-12">
+
+</div>
+
+<div class="col-md-12">
+    <div class="row">
+        <p>
+        @foreach (var s in Model.Sorting.Sorts)
+        {
+            <a class="btn btn-primary" href="@Url.PageLink("Index", values: new {sort = Model.Sorting.Remove(s.PropertyName)})">
+                <span class="badge badge-light">x</span> @s.PropertyName (@s.Direction)
+            </a>
+        }
+        </p>
+    </div>
+    <div class="row">
+        <table class="table">
+            <thead class="thead-light">
+            <tr>
+                <th>
+                    <a href="@Url.PageLink("Index", values: new {sort = Model.Sorting.AddOrUpdate(nameof(Widget.Id))})">
+                        Id
+                    </a>
+                </th>
+                <th>
+                    <a href="@Url.PageLink("Index", values: new {sort = Model.Sorting.AddOrUpdate(nameof(Widget.Name))})">
+                        Name
+                    </a>
+                </th>
+                <th>
+                    <a href="@Url.PageLink("Index", values: new {sort = Model.Sorting.AddOrUpdate(nameof(Widget.CreatedAt))})">
+                        Created At
+                    </a>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var widget in Model.Result)
+            {
+                <tr>
+                    <td>@widget.Id</td>
+                    <td>@widget.Name</td>
+                    <td>@widget.CreatedAt</td>
+                </tr>
+            }
+            </tbody>
+        </table></div>
+</div>

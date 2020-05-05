@@ -48,18 +48,6 @@ namespace Sorting.Tests
         }
 
         [Fact]
-        public void Is_Ordered()
-        {
-            Assert.True(Things.OrderBy(x => x.Id).IsOrdered());
-        }
-        
-        [Fact]
-        public void Is_Not_Ordered()
-        {
-            Assert.False(Things.IsOrdered());
-        }
-
-        [Fact]
         public void ToString_Returns_String()
         {
             var value = $"{nameof(Thing.Id)},{nameof(Thing.CreatedAt)}";

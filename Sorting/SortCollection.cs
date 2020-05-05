@@ -21,36 +21,6 @@ namespace Sorting
             var sort = new SortCollection<TSource>(sorts);
             return sort.Apply(queryable);
         }
-        
-        public static bool IsOrdered(this Expression expression)
-        {
-            var visitor = new OrderingMethodFinder();
-            visitor.Visit(expression);
-            return visitor.OrderingMethodFound;
-        }
-
-        public static bool IsOrdered(this IQueryable queryable)
-        {
-            return queryable.Expression.IsOrdered();
-        }
-        
-        private class OrderingMethodFinder : ExpressionVisitor
-        {
-            public bool OrderingMethodFound { get; set; }
-
-            protected override Expression VisitMethodCall(MethodCallExpression node)
-            {
-                var name = node.Method.Name;
-
-                if (node.Method.DeclaringType == typeof(Queryable) && (
-                    name.StartsWith("OrderBy", StringComparison.Ordinal) ||
-                    name.StartsWith("ThenBy", StringComparison.Ordinal)))
-                {
-                    OrderingMethodFound = true;
-                }
-                return base.VisitMethodCall(node);
-            }
-        }
     }
     
     public class SortCollection<TSource>
@@ -64,7 +34,7 @@ namespace Sorting
         {}
         
         public SortCollection(string value)
-            :this(value?.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries).ToList())
+            :this(value?.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries))
         {
         }
 
@@ -191,9 +161,10 @@ namespace Sorting
 
             public IQueryable<TSource> Apply(IQueryable<TSource> queryable)
             {
-                var isOrdered = queryable.Expression.IsOrdered();
+                var visitor = new OrderingMethodFinder();
+                visitor.Visit(queryable.Expression);
                 
-                if (isOrdered)
+                if (visitor.OrderingMethodFound)
                 {
                     queryable = Direction == ListSortDirection.Ascending 
                         ? ((IOrderedQueryable<TSource>)queryable).ThenBy(Filter) 
@@ -213,6 +184,24 @@ namespace Sorting
                 return Direction == ListSortDirection.Ascending
                     ? PropertyName
                     : $"-{PropertyName}";
+            }
+        
+            private class OrderingMethodFinder : ExpressionVisitor
+            {
+                public bool OrderingMethodFound { get; set; }
+
+                protected override Expression VisitMethodCall(MethodCallExpression node)
+                {
+                    var name = node.Method.Name;
+
+                    if (node.Method.DeclaringType == typeof(Queryable) && (
+                        name.StartsWith("OrderBy", StringComparison.Ordinal) ||
+                        name.StartsWith("ThenBy", StringComparison.Ordinal)))
+                    {
+                        OrderingMethodFound = true;
+                    }
+                    return base.VisitMethodCall(node);
+                }
             }
         }
 
